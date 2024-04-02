@@ -1,31 +1,31 @@
-import { GraphQLServer, PubSub } from "graphql-yoga";
-import db from "./db.js";
+import { GraphQLServer, PubSub } from 'graphql-yoga'
+import db from './db'
+import Query from './resolvers/Query'
+import Mutation from './resolvers/Mutation'
+import Subscription from './resolvers/Subscription'
+import User from './resolvers/User'
+import Post from './resolvers/Post'
+import Comment from './resolvers/Comment'
+import './prisma'
 
-import Query from "./resolvers/Query.js";
-import Mutation from "./resolvers/Mutation.js";
-import User from "./resolvers/User.js";
-import Post from "./resolvers/Post.js";
-import Comment from "./resolvers/Comment.js";
-import Subscription from "./resolvers/Subscription.js";
-
-const pubsub = new PubSub();
+const pubsub = new PubSub()
 
 const server = new GraphQLServer({
-  typeDefs: "./src/schema.graphql",
-  resolvers: {
-    Query,
-    Mutation,
-    User,
-    Post,
-    Comment,
-    Subscription,
-  },
-  context: {
-    db,
-    pubsub,
-  },
-});
+    typeDefs: './src/schema.graphql',
+    resolvers: {
+        Query,
+        Mutation,
+        Subscription,
+        User,
+        Post,
+        Comment
+    },
+    context: {
+        db,
+        pubsub
+    }
+})
 
 server.start(() => {
-  console.log("The server is up!");
-});
+    console.log('The server is up!')
+})
