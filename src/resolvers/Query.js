@@ -1,110 +1,29 @@
-import getUserId from '../utils/getUserId'
-
+import getUserId from "../utils/getUserId";
+import * as PostService from "../services/post";
+import * as UserService from "../services/user";
+import * as CommentService from "../services/user";
 const Query = {
-    users(parent, args, { prisma }, info) {
-        const opArgs = {
-            first: args.first,
-            skip: args.skip,
-            after: args.after,
-            orderBy: args.orderBy
-        }
-        
-        if (args.query) {
-            opArgs.where = {
-                OR: [{
-                    name_contains: args.query
-                }]
-            }
-        }
+  myPosts(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    return PostService.myPosts(userId, args, info);
+  },
+  async post(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    return await PostService.post(args.id, userId, info);
+  },
+  posts(parent, args, _, info) {
+    return PostService.posts(args, info);
+  },
+  comments(parent, args, { prisma }, info) {
+    return CommentService.comments(args);
+  },
+  me(parent, args, { request }, info) {
+    const userId = getUserId(request);
+    return UserService.me(userId);
+  },
+  users(parent, args, _, info) {
+    return UserService.users(args, info);
+  },
+};
 
-        return prisma.query.users(opArgs, info)
-    },
-    myPosts(parent, args, { prisma, request }, info) {
-        const userId = getUserId(request)
-        const opArgs = {
-            first: args.first,
-            skip: args.skip,
-            after: args.after,
-            orderBy: args.orderBy,
-            where: {
-                author: {
-                    id: userId
-                }
-            }
-        }
-
-        if (args.query) {
-            opArgs.where.OR = [{
-                title_contains: args.query
-            }, {
-                body_contains: args.query
-            }]
-        }
-
-        return prisma.query.posts(opArgs, info)
-    },
-    posts(parent, args, { prisma }, info) {
-        const opArgs = {
-            first: args.first,
-            skip: args.skip,
-            after: args.after,
-            orderBy: args.orderBy,
-            where: {
-                published: true
-            }
-        }
-
-        if (args.query) {
-            opArgs.where.OR = [{
-                title_contains: args.query
-            }, {
-                body_contains: args.query
-            }]
-        }
-
-        return prisma.query.posts(opArgs, info)
-    },
-    comments(parent, args, { prisma }, info) {
-        const opArgs = {
-            first: args.first,
-            skip: args.skip,
-            after: args.after,
-            orderBy: args.orderBy
-        }
-
-        return prisma.query.comments(opArgs, info)
-    },
-    me(parent, args, { prisma, request }, info) {
-        const userId = getUserId(request)
-        
-        return prisma.query.user({
-            where: {
-                id: userId
-            }
-        })
-    },
-    async post(parent, args, { prisma, request }, info) {
-        const userId = getUserId(request, false)
-
-        const posts = await prisma.query.posts({
-            where: {
-                id: args.id,
-                OR: [{
-                    published: true
-                }, {
-                    author: {
-                        id: userId
-                    }
-                }]
-            }
-        }, info)
-
-        if (posts.length === 0) {
-            throw new Error('Post not found')
-        }
-
-        return posts[0]
-    }
-}
-
-export { Query as default }
+export { Query as default };

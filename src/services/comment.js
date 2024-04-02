@@ -72,3 +72,13 @@ updateComment = async (userId, commentId, data, info) => {
     info
   );
 };
+comments = ({ first, skip, after, orderBy }, info) => {
+  const opArgs = {
+    first,
+    skip,
+    after,
+    orderBy,
+  };
+
+  return prisma.query.comments(opArgs, info);
+};

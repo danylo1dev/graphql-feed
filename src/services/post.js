@@ -71,3 +71,84 @@ updatePost = async (userId, postId, data, info) => {
     info
   );
 };
+
+post = async (postId, userId, info) => {
+  const userId = getUserId(request, false);
+
+  const posts = await prisma.query.posts(
+    {
+      where: {
+        id: postId,
+        OR: [
+          {
+            published: true,
+          },
+          {
+            author: {
+              id: userId,
+            },
+          },
+        ],
+      },
+    },
+    info
+  );
+
+  if (posts.length === 0) {
+    throw new Error("Post not found");
+  }
+
+  return posts[0];
+};
+
+posts = ({ first, skip, after, orderBy, query }, info) => {
+  const opArgs = {
+    first: first,
+    skip: skip,
+    after: after,
+    orderBy: orderBy,
+    where: {
+      published: true,
+    },
+  };
+
+  if (query) {
+    opArgs.where.OR = [
+      {
+        title_contains: query,
+      },
+      {
+        body_contains: query,
+      },
+    ];
+  }
+
+  return prisma.query.posts(opArgs, info);
+};
+
+myPosts = (userId, { first, skip, after, orderBy, query }, info) => {
+  const opArgs = {
+    first: first,
+    skip: skip,
+    after: after,
+    orderBy: orderBy,
+    where: {
+      author: {
+        id: userId,
+      },
+    },
+  };
+
+  if (query) {
+    opArgs.where.OR = [
+      {
+        title_contains: query,
+      },
+      {
+        body_contains: query,
+      },
+    ];
+  }
+
+  return prisma.query.posts(opArgs, info);
+};

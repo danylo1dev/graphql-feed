@@ -38,3 +38,31 @@ updateUser = async ({ password, userId, ...data }, info) => {
     info
   );
 };
+
+me = (userId) => {
+  return prisma.query.user({
+    where: {
+      id: userId,
+    },
+  });
+};
+users = ({ first, skip, after, orderBy, query }, info) => {
+  const opArgs = {
+    first,
+    skip,
+    after,
+    orderBy,
+  };
+
+  if (query) {
+    opArgs.where = {
+      OR: [
+        {
+          name_contains: query,
+        },
+      ],
+    };
+  }
+
+  return prisma.query.users(opArgs, info);
+};
